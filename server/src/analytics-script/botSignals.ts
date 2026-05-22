@@ -142,14 +142,16 @@ function calculateBotSignals(): BotSignalResult {
       const canvas = document.createElement("canvas");
       const gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
       if (gl) {
-        const debugInfo = (gl as WebGLRenderingContext).getExtension("WEBGL_debug_renderer_info");
-        if (debugInfo) {
-          const renderer = (gl as WebGLRenderingContext).getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
-          if (typeof renderer === "string" && renderer.includes("SwiftShader")) {
-            addSignal(CLIENT_BOT_SIGNAL_MASKS.swiftShader, 1);
+        let renderer = (gl as WebGLRenderingContext).getParameter((gl as WebGLRenderingContext).RENDERER);        
+        if (typeof renderer !== "string" || !renderer.includes("SwiftShader")) {
+          const debugInfo = (gl as WebGLRenderingContext).getExtension("WEBGL_debug_renderer_info");
+          if (debugInfo) {
+            renderer = (gl as WebGLRenderingContext).getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
           }
         }
-      }
+        if (typeof renderer === "string" && renderer.includes("SwiftShader")) {
+          addSignal(CLIENT_BOT_SIGNAL_MASKS.swiftShader, 1);
+        }
     } catch (e) {
       // WebGL not available — not a bot signal by itself
     }
